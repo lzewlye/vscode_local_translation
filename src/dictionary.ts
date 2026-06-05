@@ -132,6 +132,8 @@ function lookupEnWord(word: string): types.WordEntry {
 /**
  * 从释义中提取第一条义项（分号或逗号前的部分）。
  * CC-CEDICT 每条释义常包含多个近义表达，拼接时只取第一个避免冗余。
+ * 同时清除释义中的注解符号（方括号拼音、中文解释、| 繁简分隔符），
+ * 确保 zh→en 输出为纯英文。
  */
 function firstMeaning(def: string): string {
     const firstLine = def.includes('\\n')
@@ -139,9 +141,14 @@ function firstMeaning(def: string): string {
         : def;
     // 取分号/逗号前第一条义项
     let result = firstLine.split(/[;,]/)[0].trim();
-    // 去除括号注解: (computing), （计算机）等
+    // 去除括号注解: (computing), （计算机）, [pinyin] 等
     result = result.replace(/\([^)]*\)/g, '').trim();
     result = result.replace(/（[^）]*）/g, '').trim();
+    result = result.replace(/\[[^\]]*\]/g, '').trim();
+    // 去除残留的中文字符和 CC-CEDICT 的繁简 | 分隔符
+    result = result.replace(/[一-鿿|]/g, '').trim();
+    // 清理多余空白
+    result = result.replace(/\s+/g, ' ').trim();
     return result;
 }
 
