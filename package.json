@@ -72,7 +72,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/program-in-chinese/vscode_chinese_english_dictionary.git"
+        "url": "https://github.com/lzewlye/local_translation"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.42",

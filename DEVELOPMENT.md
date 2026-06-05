@@ -86,11 +86,11 @@ See [official docs](https://code.visualstudio.com/api/working-with-extensions/pu
 │                  Data Loading                   │
 │  loader.ts                                      │
 │  CC-CEDICT (async import) │ ECDICT (sync req.)  │
-└────────────────────┬────────────────────────────┘
-                     │
+└───────────────────────┬─────────────────────────┘
+                        │
 ┌────────────────────▼────────────────────────────┐
 │                  Dictionary Data                │
-│  dictData/zhEn/zhEn*.ts  │  dictData/enZh/*.js       │
+│  dictData/zhEn      │  dictData/enZh            │
 │  ~120K entries      │  ~770K entries + forms    │
 └─────────────────────────────────────────────────┘
 ```
