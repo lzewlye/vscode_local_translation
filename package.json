@@ -1,0 +1,84 @@
+{
+    "name": "local-translation",
+    "displayName": "汉英本地翻译",
+    "description": "本地汉英双向词典，不依赖任何在线API。汉→英基于CC-CEDICT(12万词条)，英→汉基于ECDICT(77万词条)。支持驼峰和下划线命名翻译，可批量翻译标识符。",
+    "icon": "icons/icon_light.png",
+    "version": "1.0.0",
+    "publisher": "lzewlye",
+    "license": "MIT",
+    "keywords": [
+        "translate",
+        "dictionary",
+        "Chinese",
+        "English",
+        "翻译",
+        "词典",
+        "中文",
+        "英文",
+        "汉英",
+        "英汉",
+        "offline",
+        "离线",
+        "local",
+        "本地"
+    ],
+    "engines": {
+        "vscode": "^1.29.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "localTranslation.翻译选中文本",
+                "title": "中文本地翻译"
+            },
+            {
+                "command": "localTranslation.批量翻译标识符",
+                "title": "批量翻译标识符"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "localTranslation.翻译选中文本",
+                "key": "ctrl+shift+t",
+                "mac": "cmd+shift+t",
+                "when": "editorTextFocus"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "中文本地翻译配置",
+            "properties": {
+                "localTranslation.enableHover": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "开启hover悬浮翻译文本"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./ && node -e \"var fs=require('fs'),p=require('path');var src='src/dictData/enZh',out='out/src/dictData/enZh';fs.mkdirSync(out,{recursive:true});fs.readdirSync(src).forEach(function(f){fs.copyFileSync(p.join(src,f),p.join(out,f))})\"",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/program-in-chinese/vscode_chinese_english_dictionary.git"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "eslint": "^9.32.0",
+        "typescript": "^3.9.10",
+        "vscode": "1.1.37"
+    }
+}
