@@ -1,5 +1,14 @@
 # 更新日志
 
+## 1.1.0
+
+- 🆕 快速翻译中文变量名：选中中文 → `Ctrl+Shift+T` → 一键替换为英文变量名
+- 支持三种命名风格（设置 `localTranslation.variableNamingStyle`）：
+  - `camelCase` 小驼峰（默认）
+  - `PascalCase` 大驼峰
+  - `snake_case` 下划线
+- `Ctrl+Shift+T` 重新分配给快速翻译；QuickPick 面板不再绑定默认快捷键
+
 ## 1.0.2
 
 - 限制最大翻译词数，防止一次性选取过多内容导致翻译缓慢（默认 20，可在设置中修改 `localTranslation.maxWords`）

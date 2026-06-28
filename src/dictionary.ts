@@ -156,7 +156,7 @@ function lookupEnWord(word: string): types.WordEntry {
  * 同时清除释义中的注解符号（方括号拼音、中文解释、| 繁简分隔符），
  * 确保 zh→en 输出为纯英文。
  */
-function firstMeaning(def: string): string {
+export function firstMeaning(def: string): string {
     const firstLine = def.includes('\\n')
         ? def.split('\\n')[0]
         : def;
@@ -170,6 +170,10 @@ function firstMeaning(def: string): string {
     result = result.replace(/[一-鿿|]/g, '').trim();
     // 清理多余空白
     result = result.replace(/\s+/g, ' ').trim();
+    // 去除 CC-CEDICT 中动词的 "to " 前缀和冠词等（to test → test）
+    result = result.replace(/^(to|a|an|the)\s+/i, '').trim();
+    // 去掉残留的首尾非字母数字字符（如逗号、句号、引号等）
+    result = result.replace(/^[^a-zA-Z0-9]+/, '').replace(/[^a-zA-Z0-9]+$/, '').trim();
     return result;
 }
 
