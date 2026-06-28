@@ -3,7 +3,7 @@
     "displayName": "汉英本地翻译",
     "description": "本地汉英双向词典，不依赖任何在线API。汉→英基于CC-CEDICT(12万词条)，英→汉基于ECDICT(77万词条)。支持驼峰和下划线命名翻译，可批量翻译标识符。",
     "icon": "icons/icon_light.png",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "publisher": "lzewlye",
     "license": "MIT",
     "keywords": [
@@ -35,6 +35,10 @@
     "contributes": {
         "commands": [
             {
+                "command": "localTranslation.翻译中文变量名",
+                "title": "翻译中文变量名"
+            },
+            {
                 "command": "localTranslation.翻译选中文本",
                 "title": "中文本地翻译"
             },
@@ -45,7 +49,7 @@
         ],
         "keybindings": [
             {
-                "command": "localTranslation.翻译选中文本",
+                "command": "localTranslation.翻译中文变量名",
                 "key": "ctrl+shift+t",
                 "mac": "cmd+shift+t",
                 "when": "editorTextFocus"
@@ -66,6 +70,17 @@
                     "minimum": 1,
                     "maximum": 200,
                     "description": "最大可翻译词数。超出部分将被截断，以保证翻译速度和轻便性。"
+                },
+                "localTranslation.variableNamingStyle": {
+                    "type": "string",
+                    "default": "camelCase",
+                    "enum": ["camelCase", "PascalCase", "snake_case"],
+                    "enumDescriptions": [
+                        "小驼峰：首词小写，后续词首字母大写（getUserName）",
+                        "大驼峰：每个词首字母大写（GetUserName）",
+                        "下划线：全小写，下划线分隔（get_user_name）"
+                    ],
+                    "description": "中文→英文变量名的命名风格"
                 }
             }
         }

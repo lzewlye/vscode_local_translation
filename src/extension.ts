@@ -1,11 +1,12 @@
 /**
  * Entry point for the "中文本地翻译 (localTranslation)" VS Code extension.
  *
- * 提供四个交互入口：
- * 1. 状态栏翻译 — 选中文本后自动显示简要翻译
- * 2. QuickPick 面板 — Ctrl+Shift+T 打开，支持逐词详查和反向复查
- * 3. Hover 悬停 — 鼠标悬停单词显示翻译（需配置开启）
- * 4. 批量翻译标识符 — 命令面板运行，翻译整个文件的标识符
+ * 提供五个交互入口：
+ * 1. 快速翻译变量名 — Ctrl+Shift+T 选中中文，一键替换为英文驼峰/下划线变量名
+ * 2. 状态栏翻译 — 选中文本后自动显示简要翻译
+ * 3. QuickPick 面板 — 命令面板运行，支持逐词详查和反向复查
+ * 4. Hover 悬停 — 鼠标悬停单词显示翻译（需配置开启）
+ * 5. 批量翻译标识符 — 命令面板运行，翻译整个文件的标识符
  *
  * QuickPick 三级导航流程：
  *   Overview (zh→en 逐词) → Detail (展开单词释义)
@@ -16,6 +17,7 @@ import FileTranslator, { encodeLocation } from './fileTranslator';
 import * as types from './translator/types';
 import * as dict from './dictionary';
 import * as loader from './loader';
+import * as utils from './utils';
 
 function activate(context: ExtensionContext) {
 
@@ -23,6 +25,76 @@ function activate(context: ExtensionContext) {
 
     const providerReg = Disposable.from(
         workspace.registerTextDocumentContentProvider(FileTranslator.scheme, translator)
+    );
+
+    // ==================== 快速翻译中文变量名 ====================
+    const NAMING_STYLE_CONFIG = 'localTranslation.variableNamingStyle';
+
+    const varCmd = commands.registerTextEditorCommand(
+        'localTranslation.翻译中文变量名',
+        editor => {
+            const text = editor.document.getText(editor.selection).trim();
+            if (!text) {
+                window.showWarningMessage('请先选中要翻译的中文文本。');
+                return;
+            }
+            // 仅对包含中文的文本做变量名翻译，纯英文不处理
+            if (!/[一-鿿]/.test(text)) {
+                window.showInformationMessage('快速翻译中文变量名仅对含中文的文本生效。');
+                return;
+            }
+            const result = dict.translate(text);
+            if (!result.entries.length) {
+                window.showInformationMessage('未找到翻译结果。');
+                return;
+            }
+            // 提取各词的首条纯净英文释义，拆分多词结果并过滤虚词
+            const STOP_WORDS = new Set([
+                'to', 'a', 'an', 'the',
+                'of', 'in', 'on', 'at', 'for', 'with', 'by',
+                'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                'and', 'or', 'not', 'no',
+                // CC-CEDICT 中常作为冗余修饰词
+                'language',
+            ]);
+            const words: string[] = [];
+            for (const entry of result.entries) {
+                const def = entry.definition;
+                if (!def) {
+                    // 未命中：英文字母直接保留
+                    if (/[a-zA-Z]/.test(entry.word)) {
+                        words.push(entry.word.toLowerCase());
+                    }
+                    continue;
+                }
+                const clean = dict.firstMeaning(def);
+                if (!clean) continue;
+                // 拆分空格分隔的多词释义，过滤虚词后全部保留
+                // （如 "data structure" → ["data", "structure"] → dataStructure）
+                for (const token of clean.split(/\s+/)) {
+                    const lower = token.toLowerCase();
+                    if (token && !STOP_WORDS.has(lower)) {
+                        words.push(token);
+                    }
+                }
+            }
+            if (words.length === 0) {
+                window.showInformationMessage('无法提取英文标识符。');
+                return;
+            }
+            const style = workspace.getConfiguration('localTranslation').get<string>(NAMING_STYLE_CONFIG) || 'camelCase';
+            const varName = utils.formatVariableName(words, style);
+
+            editor.edit(editBuilder => {
+                editBuilder.replace(editor.selection, varName);
+            }).then(success => {
+                if (result.truncated) {
+                    window.showWarningMessage(
+                        `输入过长，仅翻译前 ${result.entries.length} 个词。可在设置中修改 localTranslation.maxWords。`
+                    );
+                }
+            });
+        }
     );
 
     // 批量翻译标识符命令
@@ -39,7 +111,7 @@ function activate(context: ExtensionContext) {
     // 状态栏（右侧，显示简要翻译结果）
     const statusBar = window.createStatusBarItem(StatusBarAlignment.Right, 100);
     statusBar.command = 'localTranslation.翻译选中文本';
-    context.subscriptions.push(translator, batchCmd, providerReg, statusBar);
+    context.subscriptions.push(translator, varCmd, batchCmd, providerReg, statusBar);
 
     // 监听编辑器事件以实时更新状态栏
     context.subscriptions.push(
