@@ -26,4 +26,8 @@ export interface Translation {
     definition: string;
     /** Per-word breakdown */
     entries: WordEntry[];
+    /** 是否因超出 maxWords 限制被截断 */
+    truncated?: boolean;
+    /** 被跳过的词/标识符数量 */
+    skippedCount?: number;
 }

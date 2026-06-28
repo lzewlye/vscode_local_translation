@@ -11,6 +11,15 @@ import * as custom from './translator/customDict';
 import * as constants from './translator/constants';
 import * as types from './translator/types';
 import * as dict from './loader';
+import { workspace } from 'vscode';
+
+// ==================== Config ====================
+
+/** 读取用户配置的最大可翻译词数，默认 20 */
+function getMaxWords(): number {
+    const configured = workspace.getConfiguration('localTranslation').get<number>('maxWords');
+    return (typeof configured === 'number' && configured > 0) ? configured : constants.MAX_WORDS_DEFAULT;
+}
 
 // ==================== Language Detection ====================
 
@@ -55,7 +64,13 @@ export function translate(text: string): types.Translation {
  *          → entries: [{使用,use}, {Python,派森}, {编程,program}]
  */
 function translateMixed(text: string): types.Translation {
-    const words = seg.tokenize(text);
+    const maxWords = getMaxWords();
+    let words = seg.tokenize(text);
+    const originalCount = words.length;
+    const truncated = originalCount > maxWords;
+    if (truncated) {
+        words = words.slice(0, maxWords);
+    }
     if (words.length === 0) {
         return { original: text, definition: '', entries: [] };
     }
@@ -74,14 +89,20 @@ function translateMixed(text: string): types.Translation {
     }
 
     // 构建整体翻译：逐词拼接（只取分号前第一个义项）
-    const definition = entries
+    let definition = entries
         .map(e => {
             if (!e.definition) return `[${e.word}]`;
             return firstMeaning(e.definition);
         })
         .join(' ');
 
-    return { original: text, definition, entries };
+    return {
+        original: text,
+        definition,
+        entries,
+        truncated,
+        skippedCount: truncated ? originalCount - maxWords : undefined,
+    };
 }
 
 /** 中文单词 → 英文释义（自定义词典 > CC-CEDICT） */
@@ -165,7 +186,13 @@ function zhToEn(text: string): types.Translation {
         return { original: text, definition: '', entries: [] };
     }
 
-    const words = seg.tokenize(text);
+    const maxWords = getMaxWords();
+    let words = seg.tokenize(text);
+    const originalCount = words.length;
+    const truncated = originalCount > maxWords;
+    if (truncated) {
+        words = words.slice(0, maxWords);
+    }
     if (words.length === 0) {
         return { original: text, definition: '', entries: [] };
     }
@@ -211,7 +238,13 @@ function zhToEn(text: string): types.Translation {
         }
     }
 
-    return { original: text, definition, entries };
+    return {
+        original: text,
+        definition,
+        entries,
+        truncated,
+        skippedCount: truncated ? originalCount - maxWords : undefined,
+    };
 }
 
 // ==================== en→zh (ECDICT) ====================
@@ -229,7 +262,13 @@ function enToZh(text: string): types.Translation {
         return { original: text, definition: '', entries: [] };
     }
 
-    const words = enProcessor.extractWords(text);
+    const maxWords = getMaxWords();
+    let words = enProcessor.extractWords(text);
+    const originalCount = words.length;
+    const truncated = originalCount > maxWords;
+    if (truncated) {
+        words = words.slice(0, maxWords);
+    }
     if (words.length === 0) {
         return { original: text, definition: '', entries: [] };
     }
@@ -284,7 +323,13 @@ function enToZh(text: string): types.Translation {
         definition = entries[0].definition;
     }
 
-    return { original: text, definition, entries };
+    return {
+        original: text,
+        definition,
+        entries,
+        truncated,
+        skippedCount: truncated ? originalCount - maxWords : undefined,
+    };
 }
 
 // ==================== en→zh Helpers ====================

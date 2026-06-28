@@ -31,7 +31,7 @@ function activate(context: ExtensionContext) {
         editor => {
             const uri = encodeLocation(editor.document.uri, editor.selection.active);
             return workspace.openTextDocument(uri).then(
-                doc => window.showTextDocument(doc, editor.viewColumn + 1)
+                doc => window.showTextDocument(doc, editor.viewColumn !== undefined ? editor.viewColumn + 1 : undefined)
             );
         }
     );
@@ -111,6 +111,14 @@ function activate(context: ExtensionContext) {
                         description: formatDef(result.definition),
                         alwaysShow: true,
                         _entry: { word: result.original, definition: result.definition },
+                    });
+                }
+                // 截断提示
+                if (result.truncated) {
+                    items.push({
+                        label: `⚠ 仅显示前 ${result.entries.length} 个翻译结果（共 ${(result.skippedCount || 0) + result.entries.length} 个词）`,
+                        description: '可修改 localTranslation.maxWords 调整上限',
+                        alwaysShow: true,
                     });
                 }
                 picker.items = items;
@@ -283,16 +291,21 @@ function truncate(text: string, maxLen: number): string {
 
 /** Brief single-line info for the status bar */
 function getBriefInfo(result: types.Translation): string {
+    let brief: string;
     if (!result.definition) {
-        return 'Not found: ' + result.original;
-    }
-    if (result.entries.length === 1) {
+        brief = 'Not found: ' + result.original;
+    } else if (result.entries.length === 1) {
         const first = result.entries[0].definition.split('\\n')[0];
-        return first || 'Not found';
+        brief = first || 'Not found';
+    } else {
+        brief = result.entries
+            .map(e => e.definition ? e.definition.split('\\n')[0] : '[' + e.word + ']')
+            .join(' ');
     }
-    return result.entries
-        .map(e => e.definition ? e.definition.split('\\n')[0] : '[' + e.word + ']')
-        .join(' ');
+    if (result.truncated) {
+        brief += ` (前${result.entries.length}词)`;
+    }
+    return brief;
 }
 
 /** Detailed info for hover / info message */

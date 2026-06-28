@@ -4,6 +4,9 @@
  * CC-CEDICT (zh→en path) does not use POS tags — these apply to ECDICT only.
  */
 
+/** 最大可翻译词数默认值，实际以用户配置 localTranslation.maxWords 为准 */
+export const MAX_WORDS_DEFAULT = 20;
+
 /** Preferred POS tag: computer / IT domain */
 export const POS_COMPUTER = "[计]";
 

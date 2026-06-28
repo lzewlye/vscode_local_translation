@@ -20,9 +20,9 @@ const ZH_EN_SHARDS = 4;
 async function loadZhEn() {
     try {
         for (let i = 0; i < ZH_EN_SHARDS; i++) {
-            const mod = await import('./dictData/zhEn/zhEn' + i);
+            const mod: any = await import('./dictData/zhEn/zhEn' + i);
             const data = mod.数据;
-            for (let key in data) {
+            for (const key of Object.keys(data)) {
                 zhEnDict[key] = data[key];
             }
         }
@@ -46,14 +46,14 @@ export let enZhReady = false;
 function loadEnZh() {
     try {
         for (let i = 0; i < 16; i++) {
-            const mod = require('./dictData/enZh/enZh' + i);
+            const mod: any = require('./dictData/enZh/enZh' + i);
             const data = mod.数据;
-            for (let key in data) {
+            for (const key of Object.keys(data)) {
                 enZhDict[key] = data[key];
             }
         }
-        const formsMod = require('./dictData/enZh/forms');
-        for (let key in formsMod.数据) {
+        const formsMod: any = require('./dictData/enZh/forms');
+        for (const key of Object.keys(formsMod.数据)) {
             enZhForms[key] = formsMod.数据[key];
         }
         enZhReady = true;

@@ -3,7 +3,7 @@
     "displayName": "汉英本地翻译",
     "description": "本地汉英双向词典，不依赖任何在线API。汉→英基于CC-CEDICT(12万词条)，英→汉基于ECDICT(77万词条)。支持驼峰和下划线命名翻译，可批量翻译标识符。",
     "icon": "icons/icon_light.png",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "publisher": "lzewlye",
     "license": "MIT",
     "keywords": [
@@ -59,6 +59,13 @@
                     "type": "boolean",
                     "default": false,
                     "description": "开启hover悬浮翻译文本"
+                },
+                "localTranslation.maxWords": {
+                    "type": "number",
+                    "default": 20,
+                    "minimum": 1,
+                    "maximum": 200,
+                    "description": "最大可翻译词数。超出部分将被截断，以保证翻译速度和轻便性。"
                 }
             }
         }

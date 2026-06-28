@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import * as dict from './dictionary';
 import * as utils from './utils';
+import * as constants from './translator/constants';
 
 export default class FileTranslator implements vscode.TextDocumentContentProvider {
 
@@ -18,9 +19,20 @@ export default class FileTranslator implements vscode.TextDocumentContentProvide
 
     provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
         const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('没有打开的编辑器，无法批量翻译。');
+            return '';
+        }
         return vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider', editor.document.uri
-        ).then((symbols: Array<vscode.DocumentSymbol>) => {
+        ).then((symbols: Array<vscode.DocumentSymbol> | undefined) => {
+            if (!symbols || symbols.length === 0) {
+                vscode.window.showInformationMessage('当前文件没有可翻译的标识符。');
+                return '';
+            }
+            // 重置，避免多次调用时标识符累积
+            this.originalNames = [];
+
             // 收集所有标识符（含子级）
             for (let symbol of symbols) {
                 this.originalNames.push(symbol.name);
@@ -31,6 +43,16 @@ export default class FileTranslator implements vscode.TextDocumentContentProvide
 
             // 按长度降序排列，避免短词先替换破坏长词
             this.originalNames.sort((a, b) => b.length - a.length);
+
+            // 限制最大翻译数量，保证翻译速度
+            const maxWords = vscode.workspace.getConfiguration('localTranslation').get<number>('maxWords') || constants.MAX_WORDS_DEFAULT;
+            if (this.originalNames.length > maxWords) {
+                const skipped = this.originalNames.length - maxWords;
+                this.originalNames = this.originalNames.slice(0, maxWords);
+                vscode.window.showWarningMessage(
+                    `标识符过多（共 ${this.originalNames.length + skipped} 个），仅翻译前 ${maxWords} 个（跳过 ${skipped} 个）。可在设置中修改 localTranslation.maxWords 调整上限。`
+                );
+            }
 
             let newContent = editor.document.getText();
             for (let name of this.originalNames) {
