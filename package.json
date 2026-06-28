@@ -90,7 +90,8 @@
         "compile": "tsc -p ./ && node -e \"var fs=require('fs'),p=require('path');var src='src/dictData/enZh',out='out/src/dictData/enZh';fs.mkdirSync(out,{recursive:true});fs.readdirSync(src).forEach(function(f){fs.copyFileSync(p.join(src,f),p.join(out,f))})\"",
         "watch": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
+        "test": "node ./node_modules/vscode/bin/test",
+        "package": "npx vsce package"
     },
     "repository": {
         "type": "git",
