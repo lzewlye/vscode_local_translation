@@ -9,6 +9,20 @@
 3. Press **F5** in VS Code — an Extension Development Host window opens
 4. Select text in the dev window to translate
 
+## Verification
+
+The test and release checks are split so failures point to a specific layer:
+
+```bash
+npm run test:unit       # pure unit tests and fixed-seed fast-check properties
+npm run test:extension  # commands, configuration, dictionaries in VS Code 1.141.2
+npm run benchmark       # 400-case quality report and warm-query performance
+npm run package:verify  # builds and inspects the VSIX archive
+npm run verify          # runs all checks above
+```
+
+Generated reports and the verified VSIX are written to `.artifacts/`. The reviewed benchmark fixture records provenance per case: editor terminology is derived from the MIT-licensed VS Code localization data; MDN is used only to select Web glossary terms and retains CC BY-SA attribution; project regressions are project-owned. CodeSearchNet is intentionally not part of the 1.1.1 corpus.
+
 ## Project Structure
 
 ```
@@ -51,6 +65,7 @@ npm run compile
 ## Publishing
 
 ```
+npm run package:verify
 vsce publish
 ```
 

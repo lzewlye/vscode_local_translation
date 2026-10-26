@@ -9,6 +9,11 @@ export function getFileName(fullPath: string): string {
     return parts.length > 1 ? parts[parts.length - 1] : fullPath;
 }
 
+/** Replace every literal occurrence without interpreting regular-expression syntax. */
+export function replaceAllLiteral(text: string, find: string, replacement: string): string {
+    return find.length === 0 ? text : text.split(find).join(replacement);
+}
+
 // ==================== Variable Name Formatting ====================
 
 /** 小驼峰：首词小写，后续词首字母大写 → getUserName */

@@ -56,12 +56,12 @@ export function translate(text: string): types.Translation {
  * 处理流程：
  * 1. 用 segmenter.tokenize() 拆分中文/非中文片段
  * 2. 中文词 → zh→en 查找（自定义词典 > CC-CEDICT）
- * 3. 英文词 → en→zh 查找（自定义词典 > ECDICT，含大小写回退）
+ * 3. 英文词 → 原样保留（当前管线的目标方向是 zh→en）
  * 4. 数字/符号 → 保留原样
  * 5. 拼接各词释义作为整体翻译结果
  *
  * Example: "使用Python编程" → "use Python 编程" (逐词)
- *          → entries: [{使用,use}, {Python,派森}, {编程,program}]
+ *          → entries: [{使用,use}, {Python,Python}, {编程,program}]
  */
 function translateMixed(text: string): types.Translation {
     const maxWords = getMaxWords();
@@ -81,7 +81,7 @@ function translateMixed(text: string): types.Translation {
         if (/[一-鿿]/.test(word)) {
             entries.push(lookupZhWord(word));
         } else if (/[a-zA-Z]/.test(word)) {
-            entries.push(lookupEnWord(word));
+            entries.push({ word, definition: word });
         } else {
             // 数字、符号等 → 保留原样
             entries.push({ word, definition: word });
@@ -114,40 +114,6 @@ function lookupZhWord(word: string): types.WordEntry {
         return { word, definition: dict.zhEnDict[word] };
     }
     return { word, definition: '' };
-}
-
-/** 英文单词 → 中文释义（大小写回退 > 自定义词典 > ECDICT > 词性优选） */
-function lookupEnWord(word: string): types.WordEntry {
-    // 大小写回退：保留原大写优先，否则尝试小写查找
-    let lookup = word;
-    if (lookup !== word.toUpperCase()) {
-        if (dict.enZhDict[lookup] === undefined) {
-            lookup = word.toLowerCase();
-        }
-    } else {
-        if (!dict.enZhDict[lookup]) {
-            lookup = word.toLowerCase();
-        }
-    }
-
-    // 跳过词：保留原文不翻译
-    if (lookup in custom.enZhSkipWords) {
-        return { word, definition: word };
-    }
-
-    // 自定义编程术语词典
-    if (custom.enZhNames[lookup]) {
-        return { word, definition: custom.enZhNames[lookup] };
-    }
-
-    // ECDICT 主词典 + 词性优选（计算机领域优先）
-    if (dict.enZhReady && dict.enZhDict[lookup]) {
-        const def = enProcessor.pick(dict.enZhDict[lookup], constants.POS_COMPUTER);
-        return { word, definition: def };
-    }
-
-    // 未命中：保留原文
-    return { word, definition: word };
 }
 
 /**

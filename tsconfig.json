@@ -1,17 +1,21 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
+        "target": "es2019",
         "outDir": "out",
         "lib": [
-            "es6"
+            "es2020"
         ],
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
         "types": ["node", "mocha", "vscode"],
         "sourceMap": true,
         "rootDir": "."
     },
     "exclude": [
         "node_modules",
-        ".vscode-test"
+        ".vscode-test",
+        ".artifacts"
     ]
 }

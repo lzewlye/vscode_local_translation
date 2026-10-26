@@ -1,6 +1,7 @@
 .vscode/**
 .vscode-test/**
 out/test/**
+out/scripts/**
 test/**
 **/*.map
 **/*.ts
@@ -8,6 +9,10 @@ test/**
 .history
 tsconfig.json
 scripts/**
+src/dictData/enZh/**
+.artifacts/**
+.superpowers/**
+docs/superpowers/**
 .vsix
 *.vsix
 .claude/

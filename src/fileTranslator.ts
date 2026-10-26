@@ -61,19 +61,13 @@ export default class FileTranslator implements vscode.TextDocumentContentProvide
                     const translation = result.definition.includes('\\n')
                         ? result.definition.split('\\n')[0]
                         : result.definition;
-                    // 注意：如果标识符包含正则特殊字符，replaceAll 可能行为异常。
-                    // 当前接口仅处理 DocumentSymbol.name（编程标识符），
-                    // 特殊字符概率极低，暂不引入 escape 逻辑。
-                    newContent = this.replaceAll(newContent, name, translation);
+                    newContent = utils.replaceAllLiteral(newContent, name, translation);
                 }
             }
             return newContent;
         });
     }
 
-    private replaceAll(str: string, find: string, replace: string): string {
-        return str.replace(new RegExp(find, 'g'), replace);
-    }
 }
 
 let seq = 0;

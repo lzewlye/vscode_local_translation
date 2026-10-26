@@ -17,6 +17,7 @@
 .vscode-test
 out
 node_modules
+.artifacts
 .vsix
 *.vsix
 **/.DS_Store
@@ -27,3 +28,8 @@ scripts/cedict_ts.u8
 # Claude Code
 .claude/
 CLAUDE.md
+
+# Codex
+AGENTS.md
+.superpowers/
+docs/

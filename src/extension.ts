@@ -28,7 +28,7 @@ function activate(context: ExtensionContext) {
     );
 
     // ==================== 快速翻译中文变量名 ====================
-    const NAMING_STYLE_CONFIG = 'localTranslation.variableNamingStyle';
+    const NAMING_STYLE_CONFIG = 'variableNamingStyle';
 
     const varCmd = commands.registerTextEditorCommand(
         'localTranslation.翻译中文变量名',

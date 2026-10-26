@@ -3,7 +3,7 @@
     "displayName": "汉英本地翻译",
     "description": "本地汉英双向词典，不依赖任何在线API。汉→英基于CC-CEDICT(12万词条)，英→汉基于ECDICT(77万词条)。支持驼峰和下划线命名翻译，可批量翻译标识符。",
     "icon": "icons/icon_light.png",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "publisher": "lzewlye",
     "license": "MIT",
     "keywords": [
@@ -74,7 +74,11 @@
                 "localTranslation.variableNamingStyle": {
                     "type": "string",
                     "default": "camelCase",
-                    "enum": ["camelCase", "PascalCase", "snake_case"],
+                    "enum": [
+                        "camelCase",
+                        "PascalCase",
+                        "snake_case"
+                    ],
                     "enumDescriptions": [
                         "小驼峰：首词小写，后续词首字母大写（getUserName）",
                         "大驼峰：每个词首字母大写（GetUserName）",
@@ -89,9 +93,13 @@
         "vscode:prepublish": "tsc -p ./",
         "compile": "tsc -p ./ && node -e \"var fs=require('fs'),p=require('path');var src='src/dictData/enZh',out='out/src/dictData/enZh';fs.mkdirSync(out,{recursive:true});fs.readdirSync(src).forEach(function(f){fs.copyFileSync(p.join(src,f),p.join(out,f))})\"",
         "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test",
-        "package": "npx vsce package"
+        "test:unit": "npm run compile && mocha --ui tdd \"out/test/unit/**/*.test.js\"",
+        "test:extension": "npm run compile && node out/test/runExtensionTests.js",
+        "benchmark": "npm run compile && node out/test/runExtensionTests.js --benchmark",
+        "package:verify": "npm run compile && node out/scripts/packageAndVerify.js",
+        "test": "npm run test:unit && npm run test:extension",
+        "verify": "npm test && npm run benchmark && npm run package:verify",
+        "package": "vsce package"
     },
     "repository": {
         "type": "git",
@@ -101,10 +109,16 @@
         "url": "https://github.com/lzewlye/vscode_local_traslation/issues"
     },
     "devDependencies": {
-        "@types/mocha": "^2.2.48",
-        "@types/node": "^7.10.14",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^24.10.0",
+        "@types/vscode": "1.29.0",
+        "@types/yauzl": "^3.4.0",
+        "@vscode/test-electron": "^3.1.0",
+        "@vscode/vsce": "^4.0.0",
         "eslint": "^9.32.0",
-        "typescript": "^3.9.10",
-        "vscode": "1.1.37"
+        "fast-check": "^4.10.2",
+        "mocha": "^12.0.3",
+        "typescript": "^5.9.3",
+        "yauzl": "^3.4.0"
     }
 }
